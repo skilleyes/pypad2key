@@ -85,6 +85,10 @@ z_pressed = False
 s_pressed = False
 turn_right_pwm = None
 turn_left_pwm = None
+dpad_up_pressed = False
+dpad_down_pressed = False
+dpad_left_pressed = False
+dpad_right_pressed = False
 
 while 1:
     events = get_gamepad()
@@ -99,6 +103,55 @@ while 1:
             else:
                 print('Space released')
                 ReleaseKey(0x39)
+
+        # Camera button north
+        if (event.ev_type == 'Key' and event.code == 'BTN_NORTH'):
+            if (event.state == 1):
+                print('C pressed')
+                PressKey(0x2E)
+            else:
+                print('C released')
+                ReleaseKey(0x2E)
+
+        # Dpad actionnables
+        if (event.ev_type == 'Absolute' and event.code == 'ABS_HAT0Y'):
+            if (event.state == -1):
+                print('Ddap up pressed')
+                PressKey(0x02)
+                dpad_up_pressed = True
+            elif (event.state == 1):
+                print('Ddap down pressed')
+                PressKey(0x04)
+                dpad_down_pressed = True
+            else:
+                if (dpad_up_pressed):
+                    print('Ddap up released')
+                    ReleaseKey(0x02)
+                    dpad_up_pressed = False
+                if (dpad_down_pressed):
+                    print('Ddap down released')
+                    ReleaseKey(0x04)
+                    dpad_down_pressed = False
+
+
+        if (event.ev_type == 'Absolute' and event.code == 'ABS_HAT0X'):
+            if (event.state == -1):
+                print('Dpad left pressed')
+                PressKey(0x05)
+                dpad_left_pressed = True
+            elif (event.state == 1):
+                print('Dpad right pressed')
+                PressKey(0x03)
+                dpad_right_pressed = True
+            else:
+                if (dpad_left_pressed):
+                    print('Dpad left released')
+                    ReleaseKey(0x05)
+                    dpad_left_pressed = False
+                if (dpad_right_pressed):
+                    print('Dpad right released')
+                    ReleaseKey(0x03)
+                    dpad_right_pressed = False
 
         # Right trigger
         if (event.ev_type == 'Absolute' and event.code == 'ABS_RZ'):
@@ -146,7 +199,7 @@ while 1:
                     turn_left_pwm.start()
                 else:
                     print('updating left percentage')
-                    turn_left_pwm.setPercentage((-event.state - deadzone_x) / (32768 - deadzone_x) * sensitivity_xqq)
+                    turn_left_pwm.setPercentage((-event.state - deadzone_x) / (32768 - deadzone_x) * sensitivity_x)
             if (event.state >= -deadzone_x and turn_left_pwm != None):
                 print('Stop turning left')
                 turn_left_pwm.stopPWM()
