@@ -95,8 +95,8 @@ while 1:
     for event in events:
         print(event.ev_type, event.code, event.state)
 
-        # Handbrake button south
-        if (event.ev_type == 'Key' and event.code == 'BTN_SOUTH'):
+        # Handbrake button TR
+        if (event.ev_type == 'Key' and event.code == 'BTN_TR'):
             if (event.state == 1):
                 print('Space pressed')
                 PressKey(0x39)
@@ -104,8 +104,8 @@ while 1:
                 print('Space released')
                 ReleaseKey(0x39)
 
-        # Camera button north
-        if (event.ev_type == 'Key' and event.code == 'BTN_NORTH'):
+        # Camera button BTN_THUMBR
+        if (event.ev_type == 'Key' and event.code == 'BTN_THUMBR'):
             if (event.state == 1):
                 print('C pressed')
                 PressKey(0x2E)
@@ -132,7 +132,6 @@ while 1:
                     print('Ddap down released')
                     ReleaseKey(0x04)
                     dpad_down_pressed = False
-
 
         if (event.ev_type == 'Absolute' and event.code == 'ABS_HAT0X'):
             if (event.state == -1):
@@ -205,5 +204,3 @@ while 1:
                 turn_left_pwm.stopPWM()
                 turn_left_pwm = None
             
-
-
