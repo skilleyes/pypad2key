@@ -1,5 +1,5 @@
 from inputs import get_gamepad
-
+from threading import Thread
 import ctypes
 import time
 
@@ -52,10 +52,35 @@ def ReleaseKey(hexKeyCode):
     x = Input( ctypes.c_ulong(1), ii_ )
     ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
+class PWM(Thread):
+    def __init__(self, keyScanCode):
+        Thread.__init__(self)
+        self.keyScanCode = keyScanCode
+        self.stop = False
+        self.percentage = 0.0
+        self.period = 0.1
+
+    def stopPWM(self):
+        self.stop = True
+
+    # percentage between 0 and 1
+    def setPercentage(self, percentage):
+        self.percentage = percentage
+
+    def run(self):
+        while (self.stop != True):
+            PressKey(self.keyScanCode)
+            time.sleep(self.period * self.percentage)
+            ReleaseKey(self.keyScanCode)
+            time.sleep(self.period * (1 - self.percentage))
+            
+    
+        
+
 z_pressed = False
 s_pressed = False
-turning_right = False
-turning_left = False
+turn_right_pwm = None
+turn_left_pwm = None
 
 while 1:
     events = get_gamepad()
@@ -93,21 +118,33 @@ while 1:
 
         # Left Analog X
         if (event.ev_type == 'Absolute' and event.code == "ABS_X"):
-            if (event.state > 6000 and turning_right == False):
-                print('Turning right')
-                PressKey(0x20)
-                turning_right = True
-            if (event.state <= 6000 and turning_right == True):
+            # Turn right
+            if (event.state > 6000):
+                if (turn_right_pwm == None):
+                    print('Turning right')
+                    turn_right_pwm = PWM(0x20)
+                    turn_right_pwm.start()
+                else:
+                    print('updating right percentage')
+                    turn_right_pwm.setPercentage((event.state - 6000) / (32768 - 6000))
+            if (event.state <= 6000 and turn_right_pwm != None):
                 print('Stop turning right')
-                ReleaseKey(0x20)
-                turning_right = False
-            if (event.state < -6000 and turning_left == False):
-                print('Turning left')
-                PressKey(0x1E)
-                turning_left = True
-            if (event.state >= -6000 and turning_left == True):
+                turn_right_pwm.stopPWM()
+                turn_right_pwm = None
+
+            # Turn left    
+            if (event.state < -6000):
+                if (turn_left_pwm == None):
+                    print('Turning left')
+                    turn_left_pwm = PWM(0x1E)
+                    turn_left_pwm.start()
+                else:
+                    print('updating left percentage')
+                    turn_left_pwm.setPercentage((-event.state - 6000) / (32768 - 6000))
+            if (event.state >= -6000 and turn_left_pwm != None):
                 print('Stop turning left')
-                ReleaseKey(0x1E)
-                turning_left = False
+                turn_left_pwm.stopPWM()
+                turn_left_pwm = None
+            
 
 
