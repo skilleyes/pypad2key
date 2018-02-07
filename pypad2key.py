@@ -65,7 +65,12 @@ class PWM(Thread):
 
     # percentage between 0 and 1
     def setPercentage(self, percentage):
-        self.percentage = percentage
+        if (percentage > 1.0):
+            self.percentage = 1.0
+        elif (percentage < 0.0):
+            self.percentage = 0.0
+        else: 
+            self.percentage = percentage
 
     def run(self):
         while (self.stop != True):
@@ -74,9 +79,8 @@ class PWM(Thread):
             ReleaseKey(self.keyScanCode)
             time.sleep(self.period * (1 - self.percentage))
             
-    
-        
-
+deadzone_x = 500
+sensitivity_x = 1.4
 z_pressed = False
 s_pressed = False
 turn_right_pwm = None
@@ -85,7 +89,9 @@ turn_left_pwm = None
 while 1:
     events = get_gamepad()
     for event in events:
-        #print(event.ev_type, event.code, event.state)
+        print(event.ev_type, event.code, event.state)
+
+        # Handbrake button south
         if (event.ev_type == 'Key' and event.code == 'BTN_SOUTH'):
             if (event.state == 1):
                 print('Space pressed')
@@ -119,29 +125,29 @@ while 1:
         # Left Analog X
         if (event.ev_type == 'Absolute' and event.code == "ABS_X"):
             # Turn right
-            if (event.state > 6000):
+            if (event.state > deadzone_x):
                 if (turn_right_pwm == None):
                     print('Turning right')
                     turn_right_pwm = PWM(0x20)
                     turn_right_pwm.start()
                 else:
                     print('updating right percentage')
-                    turn_right_pwm.setPercentage((event.state - 6000) / (32768 - 6000))
-            if (event.state <= 6000 and turn_right_pwm != None):
+                    turn_right_pwm.setPercentage((event.state - deadzone_x) / (32768 - deadzone_x) * sensitivity_x)
+            if (event.state <= deadzone_x and turn_right_pwm != None):
                 print('Stop turning right')
                 turn_right_pwm.stopPWM()
                 turn_right_pwm = None
 
             # Turn left    
-            if (event.state < -6000):
+            if (event.state < -deadzone_x):
                 if (turn_left_pwm == None):
                     print('Turning left')
                     turn_left_pwm = PWM(0x1E)
                     turn_left_pwm.start()
                 else:
                     print('updating left percentage')
-                    turn_left_pwm.setPercentage((-event.state - 6000) / (32768 - 6000))
-            if (event.state >= -6000 and turn_left_pwm != None):
+                    turn_left_pwm.setPercentage((-event.state - deadzone_x) / (32768 - deadzone_x) * sensitivity_xqq)
+            if (event.state >= -deadzone_x and turn_left_pwm != None):
                 print('Stop turning left')
                 turn_left_pwm.stopPWM()
                 turn_left_pwm = None
