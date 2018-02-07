@@ -80,7 +80,7 @@ class PWM(Thread):
             time.sleep(self.period * (1 - self.percentage))
             
 deadzone_x = 500
-sensitivity_x = 1.4
+sensitivity_x = 2
 z_pressed = False
 s_pressed = False
 turn_right_pwm = None
@@ -104,6 +104,15 @@ while 1:
                 print('Space released')
                 ReleaseKey(0x39)
 
+        # Rear view button TL
+        if (event.ev_type == 'Key' and event.code == 'BTN_TL'):
+            if (event.state == 1):
+                print('Space pressed')
+                PressKey(0x12)
+            else:
+                print('Space released')
+                ReleaseKey(0x12)
+
         # Camera button BTN_THUMBR
         if (event.ev_type == 'Key' and event.code == 'BTN_THUMBR'):
             if (event.state == 1):
@@ -121,7 +130,7 @@ while 1:
                 dpad_up_pressed = True
             elif (event.state == 1):
                 print('Ddap down pressed')
-                PressKey(0x04)
+                PressKey(0x05)
                 dpad_down_pressed = True
             else:
                 if (dpad_up_pressed):
@@ -130,26 +139,26 @@ while 1:
                     dpad_up_pressed = False
                 if (dpad_down_pressed):
                     print('Ddap down released')
-                    ReleaseKey(0x04)
+                    ReleaseKey(0x05)
                     dpad_down_pressed = False
 
         if (event.ev_type == 'Absolute' and event.code == 'ABS_HAT0X'):
             if (event.state == -1):
                 print('Dpad left pressed')
-                PressKey(0x05)
+                PressKey(0x03)
                 dpad_left_pressed = True
             elif (event.state == 1):
                 print('Dpad right pressed')
-                PressKey(0x03)
+                PressKey(0x04)
                 dpad_right_pressed = True
             else:
                 if (dpad_left_pressed):
                     print('Dpad left released')
-                    ReleaseKey(0x05)
+                    ReleaseKey(0x03)
                     dpad_left_pressed = False
                 if (dpad_right_pressed):
                     print('Dpad right released')
-                    ReleaseKey(0x03)
+                    ReleaseKey(0x04)
                     dpad_right_pressed = False
 
         # Right trigger
