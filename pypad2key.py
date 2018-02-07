@@ -1,10 +1,4 @@
 from inputs import get_gamepad
-#from pynput.keyboard import Key, Controller
-
-#keyboard = Controller()
-
-import win32api
-import win32con
 
 import ctypes
 import time
@@ -59,29 +53,61 @@ def ReleaseKey(hexKeyCode):
     ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
 z_pressed = False
+s_pressed = False
+turning_right = False
+turning_left = False
 
 while 1:
     events = get_gamepad()
     for event in events:
-        print(event.ev_type, event.code, event.state)
+        #print(event.ev_type, event.code, event.state)
         if (event.ev_type == 'Key' and event.code == 'BTN_SOUTH'):
             if (event.state == 1):
-                print('A pressed')
-                #keyboard.press('A')
+                print('Space pressed')
+                PressKey(0x39)
             else:
-                print('A released')
-                #keyboard.release('A')
+                print('Space released')
+                ReleaseKey(0x39)
 
+        # Right trigger
         if (event.ev_type == 'Absolute' and event.code == 'ABS_RZ'):
             if (event.state > 30 and z_pressed == False):
                 print('Z pressed')
-                #keyboard.press('z')
-                #win32api.keybd_event(0x5A, 0, 0, 0)
                 PressKey(0x11)
                 z_pressed = True
             elif (event.state <= 30 and z_pressed == True):
-                print('Z released')
-                #keyboard.release('z')
-                #win32api.keybd_event(0x5A, 0, 2, 0)                             
+                print('Z released')                      
                 ReleaseKey(0x11)
                 z_pressed = False
+
+        # Left trigger
+        if (event.ev_type == 'Absolute' and event.code == 'ABS_Z'):
+            if (event.state > 30 and s_pressed == False):
+                print('S pressed')
+                PressKey(0x1F)
+                s_pressed = True
+            elif (event.state <= 30 and s_pressed == True):
+                print('S released')                      
+                ReleaseKey(0x1F)
+                s_pressed = False
+
+        # Left Analog X
+        if (event.ev_type == 'Absolute' and event.code == "ABS_X"):
+            if (event.state > 6000 and turning_right == False):
+                print('Turning right')
+                PressKey(0x20)
+                turning_right = True
+            if (event.state <= 6000 and turning_right == True):
+                print('Stop turning right')
+                ReleaseKey(0x20)
+                turning_right = False
+            if (event.state < -6000 and turning_left == False):
+                print('Turning left')
+                PressKey(0x1E)
+                turning_left = True
+            if (event.state >= -6000 and turning_left == True):
+                print('Stop turning left')
+                ReleaseKey(0x1E)
+                turning_left = False
+
+
